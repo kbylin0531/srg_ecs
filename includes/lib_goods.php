@@ -1,25 +1,16 @@
 <?php
 
 /**
- * ECSHOP 商品相关函数库
- * ============================================================================
- * * 版权所有 2005-2012 上海商派网络科技有限公司，并保留所有权利。
- * 网站地址: http://www.ecshop.com；
- * ----------------------------------------------------------------------------
- * 这不是一个自由软件！您只能在不用于商业目的的前提下对程序代码进行修改和
- * 使用；不允许对程序代码以任何形式任何目的的再发布。
- * ============================================================================
- * $Author: liubo $
- * $Id: lib_goods.php 17217 2011-01-19 06:29:08Z liubo $
+* 商品相关函数库
 */
 
-if (!defined('IN_ECS'))
-{
-    die('Hacking attempt');
-}
+defined('IN_ECS') or die('Hacking attempt');
 
 /**
  * 商品推荐usort用自定义排序行数
+ * @param $goods_a
+ * @param $goods_b
+ * @return int
  */
 function goods_sort($goods_a, $goods_b)
 {
@@ -83,6 +74,7 @@ function get_categories_tree($cat_id = 0)
     {
         return $cat_arr;
     }
+    return null;
 }
 
 function get_child_tree($tree_id = 0)
@@ -896,12 +888,11 @@ function assign_brand_goods($brand_id, $num = 0, $cat_id = 0,$order_rule = '')
  * 获得所有扩展分类属于指定分类的所有商品ID
  *
  * @access  public
- * @param   string $cat_id     分类查询字符串
+ * @param   string $cats     分类查询字符串
  * @return  string
  */
 function get_extension_goods($cats)
 {
-    $extension_goods_array = '';
     $sql = 'SELECT goods_id FROM ' . $GLOBALS['ecs']->table('goods_cat') . " AS g WHERE $cats";
     $extension_goods_array = $GLOBALS['db']->getCol($sql);
     return db_create_in($extension_goods_array, 'g.goods_id');

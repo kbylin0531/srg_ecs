@@ -67,14 +67,11 @@ class Chinese
      * Chinese 的悉构函数
      *
      * 详细说明
-     * @形参      字符串 $source_lang 为需要转换的字符串的原编码
+     * @param string $dir      字符串 $source_lang 为需要转换的字符串的原编码
      *            字符串 $target_lang 为转换的目标编码
      *            字符串 $SourceText 为等待转换的字符串
-     * @访问      公开
-     * @返回值    无
-     * @throws
      */
-    function Chinese($dir = './')
+    function __construct($dir = './')
     {
         $this->config['codetable_dir'] = $dir . "includes/codetable/";
 
@@ -135,7 +132,7 @@ class Chinese
             else
             {
                 $string = '';
-                $text = $SourceText;
+                $text = $this->SourceText;
                 while ($text)
                 {
                     if (ord(substr($text, 0, 1)) > 127)
@@ -180,6 +177,7 @@ class Chinese
                                 $uchar += ord($char[3])  & 0x3f;
                                 break;
                         }
+                        isset($uchar) or $uchar = 0;
                         $string .= '&#x' . dechex($uchar) . ';';
 
                         if ($this->config['source_lang'] != 'UTF-8')
@@ -280,21 +278,15 @@ class Chinese
             {
                 return $return_string;
             }
-            else
-            {
-                return false;
-            }
         }
+        return false;
     }
 
     /**
      * 将 16 进制转换为 2 进制字符
      *
-     * 详细说明
-     * @形参      $hexdata 为16进制的编码
-     * @访问      内部
-     * @返回      字符串
-     * @throws
+     * @param int $hexdata 为16进制的编码
+     * @return string
      */
     function _hex2bin($hexdata)
     {
@@ -454,11 +446,8 @@ class Chinese
     /**
      * 将简体、繁体中文的 UNICODE 编码转换为 UTF8 字符
      *
-     * 详细说明
-     * @形参      数字 $c 简体中文汉字的UNICODE编码的10进制
-     * @访问      内部
-     * @返回      字符串
-     * @throws
+     * @param int $c 简体中文汉字的UNICODE编码的10进制
+     * @return string
      */
     function CHSUtoUTF8($c)
     {
@@ -517,6 +506,7 @@ class Chinese
                     {
                         $utf8 = $this->CHSUtoUTF8(hexdec(@$this->unicode_table[hexdec(bin2hex($this->SourceText{0} . $this->SourceText{1})) - 0x8080]));
                     }
+                    isset($utf8) or $utf8 = '';
                     for ($i = 0, $count = strlen($utf8); $i < $count; $i += 3)
                     {
                         $ret .= chr(substr($utf8, $i, 3));
@@ -585,6 +575,7 @@ class Chinese
             // 返回结果
             return $out;
         }
+        return null;
     }
 
     /**
@@ -674,4 +665,3 @@ class Chinese
     }
 }
 
-?>

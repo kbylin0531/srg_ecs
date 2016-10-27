@@ -2,7 +2,6 @@
 
 define('IN_ECS', true);
 
-include_once './includes/init.php';
+include_once __DIR__.'/includes/init.php';
 
 dispatch($_POST);
-?>

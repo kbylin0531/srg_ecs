@@ -217,5 +217,3 @@ function get_accountlist($user_id, $account_type = '')
 
     return array('account' => $arr, 'filter' => $filter, 'page_count' => $filter['page_count'], 'record_count' => $filter['record_count']);
 }
-
-?>

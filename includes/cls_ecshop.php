@@ -138,7 +138,7 @@ class ECS
     /**
      * 获得数据目录的路径
      *
-     * @param int $sid
+     * @param int $sid 数据ID
      *
      * @return string 路径
      */
@@ -157,7 +157,7 @@ class ECS
     /**
      * 获得图片的目录路径
      *
-     * @param int $sid
+     * @param int $sid 图片ID
      *
      * @return string 路径
      */

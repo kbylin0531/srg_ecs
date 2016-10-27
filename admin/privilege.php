@@ -909,4 +909,3 @@ function getYunqiAd($ident){
     return $results['data'];
 }
 
-?>

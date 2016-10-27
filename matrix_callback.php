@@ -48,5 +48,3 @@ if(!empty($data)){
 }else{
     exit('{"res":"fail","msg":"error:000001","info":""}');
 }
-
-?>

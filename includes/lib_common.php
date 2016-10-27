@@ -21,10 +21,10 @@ if (!defined('IN_ECS')) {
  * 创建像这样的查询: "IN('a','b')";
  *
  * @access   public
- * @param    mix $item_list 列表数组或字符串
+ * @param    array|string $item_list 列表数组或字符串
  * @param    string $field_name 字段名称
  *
- * @return   void
+ * @return   string
  */
 function db_create_in($item_list, $field_name = '')
 {
@@ -1272,7 +1272,7 @@ function smarty_create_pages($params)
  * @param   string $append 附加字串
  * @param   integer $page 页数
  * @param   string $keywords 搜索关键词字符串
- * @return  void
+ * @return  string
  */
 function build_uri($app, $params, $append = '', $page = 0, $keywords = '')
 {
@@ -1556,8 +1556,8 @@ function formated_weight($weight)
 /**
  * 记录帐户变动
  * @param   int $user_id 用户id
- * @param   float $user_money 可用余额变动
- * @param   float $frozen_money 冻结余额变动
+ * @param   int $user_money 可用余额变动
+ * @param   int $frozen_money 冻结余额变动
  * @param   int $rank_points 等级积分变动
  * @param   int $pay_points 消费积分变动
  * @param   string $change_desc 变动说明
@@ -1595,7 +1595,7 @@ function log_account_change($user_id, $user_money = 0, $frozen_money = 0, $rank_
  * @param   int $user_id 用户id
  * @param   int $order_id order_id
  * @param   string $order_sn order_sn
- * @param   float $money 支付金额
+ * @param   int $money 支付金额
  * @param   string $pay_type 支付类型
  * @param   string $pay_time 支付时间
  * @param   string $change_desc 变动说明
@@ -1625,7 +1625,7 @@ function log_account_other_change($user_id, $order_id, $order_sn, $money = 0, $p
  * @param   int $selected 当前选中分类的ID
  * @param   boolean $re_type 返回的类型: 值为真时返回下拉列表,否则返回数组
  * @param   int $level 限定返回的级数。为0时返回所有级数
- * @return  mix
+ * @return  mixed
  */
 function article_cat_list($cat_id = 0, $selected = 0, $re_type = true, $level = 0)
 {
@@ -1707,10 +1707,9 @@ function article_cat_list($cat_id = 0, $selected = 0, $re_type = true, $level = 
  * 过滤和排序所有文章分类，返回一个带有缩进级别的数组
  *
  * @access  private
- * @param   int $cat_id 上级分类ID
+ * @param   int $spec_cat_id 上级分类ID
  * @param   array $arr 含有所有分类的数组
- * @param   int $level 级别
- * @return  void
+ * @return  array
  */
 function article_cat_options($spec_cat_id, $arr)
 {

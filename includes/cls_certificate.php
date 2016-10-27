@@ -1,25 +1,11 @@
 <?php
 
+defined('IN_ECS') or die('Hacking attempt');
+
 /**
- * ECSHOP LICENSE 相关函数类
- * ============================================================================
- * * 版权所有 2005-2012 上海商派网络科技有限公司，并保留所有权利。
- * 网站地址: http://www.ecshop.com；
- * ----------------------------------------------------------------------------
- * 这不是一个自由软件！您只能在不用于商业目的的前提下对程序代码进行修改和
- * 使用；不允许对程序代码以任何形式任何目的的再发布。
- * ============================================================================
- * $Author: liubo $
- * $Id: cls_certificate.php 16336 2009-06-24 07:09:13Z liubo $
-*/
-
-if (!defined('IN_ECS'))
-{
-    die('Hacking attempt');
-}
-
-class certificate
-{
+ * Class certificate LICENSE 相关函数类
+ */
+class certificate {
 
     /**
      * 构造函数
@@ -27,7 +13,6 @@ class certificate
      * @access  public
      * @param
      *
-     * @return void
      */
     function __construct(){
         include_once(ROOT_PATH."admin/includes/oauth/oauth2.php");
@@ -54,8 +39,10 @@ class certificate
     }
 
     /**
-    * 设置 certificate 信息
-    */
+     * 设置 certificate 信息
+     * @param $data
+     * @return bool
+     */
     function set_shop_certificate($data){
         $certificate = $this->get_shop_certificate();
         $codes = array('certificate_id','token','node_id','passport_uid','use_yunqi_login','yunqi_code','use_yunqi_authority','yunqiexp_active');

@@ -108,5 +108,3 @@ if ($_CFG['shop_closed'] == 1)
     /* 商店关闭了，输出关闭的消息 */
     client_show_message(105);
 }
-
-?>
