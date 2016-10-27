@@ -23,7 +23,7 @@ require_once(ROOT_PATH . ADMIN_PATH . '/includes/cls_sql_dump.php');
 /* 备份页面 */
 if ($_REQUEST['act'] == 'backup')
 {
-    $tables = $db->GetCol("SHOW TABLES LIKE '" . mysql_like_quote($ecs->prefix) . "%'");
+    $tables = $db->getCol("SHOW TABLES LIKE '" . mysql_like_quote($ecs->prefix) . "%'");
     $allow_max_size = return_bytes(@ini_get('upload_max_filesize')); // 单位为字节
     $allow_max_size = $allow_max_size / 1024; // 转换单位为 KB
 
@@ -717,7 +717,7 @@ function sql_import($sql_file)
  * @access  public
  * @param
  *
- * @return void
+ * @return string
  */
 function num_bitunit($num)
 {
@@ -738,11 +738,10 @@ function num_bitunit($num)
  *
  * @access  public
  * @param
- * @return  void
+ * @return  string
  */
 function remove_comment($var)
 {
     return (substr($var, 0, 2) != '--');
 }
 
-?>
