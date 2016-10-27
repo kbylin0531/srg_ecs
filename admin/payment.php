@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 $exc = new exchange($ecs->table('payment'), $db, 'pay_code', 'pay_name');
 

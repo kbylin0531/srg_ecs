@@ -98,7 +98,7 @@ function check_templates_priv($templates_root)
  *
  * @return void
  */
-function check_rename_priv()
+function check_rename_priv22()
 {
     /* 鑾峰彇瑕佹?鏌ョ殑鐩?綍 */
     $dir_list   = array();

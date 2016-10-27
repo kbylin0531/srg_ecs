@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 require(ROOT_PATH . 'includes/lib_payment.php');
 require(ROOT_PATH . 'includes/lib_order.php');
 /* 支付方式代码 */
@@ -78,7 +78,7 @@ else
     else
     {
 
-        $plugin_file = dirname(__FILE__).'/includes/modules/payment/' . $pay_code . '.php';
+        $plugin_file = __DIR__.'/includes/modules/payment/' . $pay_code . '.php';
         /* 检查插件文件是否存在，如果存在则验证支付是否成功，否则则返回失败信息 */
         if (file_exists($plugin_file))
         {

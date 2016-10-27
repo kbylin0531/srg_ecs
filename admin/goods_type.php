@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 $exc = new exchange($ecs->table("goods_type"), $db, 'cat_id', 'cat_name');
 

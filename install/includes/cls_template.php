@@ -41,7 +41,6 @@ class template
      *
      * @access  public
      * @param   string       $path
-     * @return  void
      */
     function __construct($path)
     {
@@ -103,5 +102,3 @@ class template
         echo $this->fetch($file);
     }
 }
-
-?>

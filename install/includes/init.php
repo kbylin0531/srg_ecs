@@ -1,45 +1,37 @@
 <?php
 
-/* ±¨¸æËùÓĞ´íÎó */
-@ini_set('display_errors', 1);
+/* é”™è¯¯æ˜¾ç¤º */
+ini_set('display_errors', 1);
 error_reporting(E_ALL ^ E_NOTICE);
 
-/* Çå³ıËùÓĞºÍÎÄ¼ş²Ù×÷Ïà¹ØµÄ×´Ì¬ĞÅÏ¢ */
+/* å¦‚æœåœ¨ä¸€ä¸ªè„šæœ¬ä¸­å¤šæ¬¡æ£€æŸ¥åŒä¸€ä¸ªæ–‡ä»¶ï¼Œè€Œè¯¥æ–‡ä»¶åœ¨æ­¤è„šæœ¬æ‰§è¡ŒæœŸé—´æœ‰è¢«åˆ é™¤æˆ–ä¿®æ”¹çš„å±é™©æ—¶ï¼Œä½ éœ€è¦æ¸…é™¤æ–‡ä»¶çŠ¶æ€ç¼“å­˜ */
 clearstatcache();
 
-/* ¶¨ÒåÕ¾µã¸ù */
+/* å®šä¹‰æ ¹ç›®å½• */
 define('ROOT_PATH', str_replace('install/includes/init.php', '', str_replace('\\', '/', __FILE__)));
+define('PHP_SELF', isset($_SERVER['PHP_SELF']) ? $_SERVER['PHP_SELF'] : $_SERVER['SCRIPT_NAME']);
+//var_dump($_SERVER,PHP_SELF);die();//è®¿é—®çš„ç›¸å¯¹ç›®å½•ï¼š/ecshop/install/index.php
 
-if (isset($_SERVER['PHP_SELF']))
-{
-    define('PHP_SELF', $_SERVER['PHP_SELF']);
-}
-else
-{
-    define('PHP_SELF', $_SERVER['SCRIPT_NAME']);
-}
-
-/* ¶¨Òå°æ±¾µÄ±àÂë */
+/* å®šä¹‰ç¼–ç æ ¼å¼ */
 define('EC_CHARSET','utf-8');
 define('EC_DB_CHARSET','utf8');
 
+/* å‡½æ•°åŒ…åŠ è½½ */
 require(ROOT_PATH . 'includes/lib_base.php');
 require(ROOT_PATH . 'includes/lib_common.php');
 require(ROOT_PATH . 'includes/lib_time.php');
 
-/* ´´½¨´íÎó´¦Àí¶ÔÏó */
+/* é”™è¯¯å¤„ç†ç±» è½½å…¥ */
 require(ROOT_PATH . 'includes/cls_error.php');
 $err = new ecs_error('message.dwt');
 
-/* ³õÊ¼»¯Ä£°åÒıÇæ */
+/* æ¨¡æ¿ç±» è½½å…¥ */
 require(ROOT_PATH . 'install/includes/cls_template.php');
 $smarty = new template(ROOT_PATH . 'install/templates/');
 
+/* å®‰è£…ç›¸å…³å‡½æ•°åŒ… è½½å…¥ */
 require(ROOT_PATH . 'install/includes/lib_installer.php');
-
-/* ·¢ËÍHTTPÍ·²¿£¬±£Ö¤ä¯ÀÀÆ÷Ê¶±ğUTF8±àÂë */
+/* UTF-8 ç›¸åº”å¤´éƒ¨*/
 header('Content-type: text/html; charset='.EC_CHARSET);
 
-@set_time_limit(360);
-
-?>
+set_time_limit(360);

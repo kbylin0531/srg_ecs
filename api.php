@@ -13,7 +13,7 @@
  */
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 // require(ROOT_PATH . 'includes/lib_license.php');
 require_once('includes/cls_certificate.php');
 require_once('includes/cls_json.php');

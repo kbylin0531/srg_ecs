@@ -14,7 +14,7 @@
  */
 
 define('IN_ECS', true);
-require(dirname(__FILE__) . '/includes/auto_init.php');
+require(__DIR__ . '/includes/auto_init.php');
 require_once('../includes/cls_json.php');
 
 /* 初始化语言变量 */
@@ -159,5 +159,3 @@ function data_back($msg, $result = 'false')
     $json  = new JSON;
     die($json->encode($data_arr));    //把生成的返回字符串打印出来
 }
-
-?>

@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 $exc = new exchange($ecs->table("user_rank"), $db, 'rank_id', 'rank_name');
 $exc_user = new exchange($ecs->table("users"), $db, 'user_rank', 'user_rank');

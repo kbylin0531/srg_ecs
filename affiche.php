@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 define('INIT_NO_SMARTY', true);
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 /* 没有指定广告的id及跳转地址 */
 if (empty($_GET['ad_id']))

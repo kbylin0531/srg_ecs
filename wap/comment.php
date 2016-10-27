@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 $goods_id = !empty($_GET['g_id']) ? intval($_GET['g_id']) : exit();
 if ($goods_id <= 0)

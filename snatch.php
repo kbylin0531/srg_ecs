@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 /*------------------------------------------------------ */
 //-- 如果用没有指定活动id，将页面重定向到即将结束的活动

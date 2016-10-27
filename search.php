@@ -28,8 +28,8 @@ if (empty($_GET['encode']))
     $string = array_merge($_GET, $_POST);
     if (get_magic_quotes_gpc())
     {
-        require(dirname(__FILE__) . '/includes/lib_base.php');
-        //require(dirname(__FILE__) . '/includes/lib_common.php');
+        require(__DIR__ . '/includes/lib_base.php');
+        //require(__DIR__ . '/includes/lib_common.php');
 
         $string = stripslashes_deep($string);
     }
@@ -72,7 +72,7 @@ else
     }
 }
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 $_REQUEST = array_merge($_REQUEST, addslashes_deep($string));
 

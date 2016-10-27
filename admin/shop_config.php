@@ -16,7 +16,7 @@
 define('IN_ECS', true);
 
 /* 代码 */
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 if($GLOBALS['_CFG']['certificate_id']  == '')
 {

@@ -409,7 +409,7 @@ class prism_client extends prism_curl{
     }
 
     public function notify(){
-        include_once(dirname(__FILE__).'/notify.php');
+        include_once(__DIR__.'/notify.php');
         return new prism_notify($this);
     }
 

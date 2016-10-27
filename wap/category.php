@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 $c_id = !empty($_GET['c_id']) ? intval($_GET['c_id']) : 0;
 if ($c_id <= 0)

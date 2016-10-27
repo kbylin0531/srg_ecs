@@ -14,7 +14,7 @@
 */
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 $action  = isset($_REQUEST['act']) ? trim($_REQUEST['act']) : 'default';
 if ($action == 'print_quotation')

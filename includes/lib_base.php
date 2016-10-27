@@ -669,9 +669,9 @@ function gzip_enabled()
  * 递归方式的对变量中的特殊字符进行转义
  *
  * @access  public
- * @param   mix     $value
+ * @param   mixed     $value
  *
- * @return  mix
+ * @return  mixed
  */
 function addslashes_deep($value)
 {
@@ -784,9 +784,9 @@ function compile_str($str)
  * 检查文件类型
  *
  * @access      public
- * @param       string      filename            文件名
- * @param       string      realname            真实文件名
- * @param       string      limit_ext_types     允许的文件类型
+ * @param       string      $filename            文件名
+ * @param       string      $realname            真实文件名
+ * @param       string      $limit_ext_types     允许的文件类型
  * @return      string
  */
 function check_file_type($filename, $realname = '', $limit_ext_types = '')
@@ -1246,33 +1246,23 @@ function get_file_suffix($file_name, $allow_type = array())
 
 /**
  * 读结果缓存文件
- *
- * @params  string  $cache_name
- *
- * @return  array   $data
+ * @param  string  $cache_name
+ * @return  array|false   $data
  */
-function read_static_cache($cache_name)
+function read_static_cache(string $cache_name)
 {
-    if ((DEBUG_MODE & 2) == 2)
-    {
+    if ((DEBUG_MODE & 2) == 2) {
         return false;
     }
     static $result = array();
-    if (!empty($result[$cache_name]))
-    {
-        return $result[$cache_name];
+    if (empty($result[$cache_name]))  {
+        $cache_file_path = ROOT_PATH . '/temp/static_caches/' . $cache_name . '.php';
+        if (file_exists($cache_file_path)) {
+            $result[$cache_name] = include_once($cache_file_path);
+            return $result[$cache_name];
+        }
     }
-    $cache_file_path = ROOT_PATH . '/temp/static_caches/' . $cache_name . '.php';
-    if (file_exists($cache_file_path))
-    {
-        include_once($cache_file_path);
-        $result[$cache_name] = $data;
-        return $result[$cache_name];
-    }
-    else
-    {
-        return false;
-    }
+    return $result[$cache_name];
 }
 
 /**

@@ -33,5 +33,3 @@ define('OLD_AUTH_KEY', '');
 define('API_TIME', '');
 
 define('STORE_KEY','753e8a2cac6fe6cd82ed5b2d5da3559b');
-
-?>

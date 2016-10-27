@@ -144,7 +144,7 @@ class mdl_serverinfo{
             'result'=>$rst,
         );
 
-        include(dirname(__FILE__).'/../data/config.php');
+        include(__DIR__.'/../data/config.php');
         if(!$rst){
             $allow_install = false;
         }else{
@@ -550,7 +550,7 @@ if(!defined('IN_INSTALLER')){
         header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 
         $disFunc = get_cfg_var("disable_functions");
-        if(($disFunc || !preg_match('/phpinfo/i',$disFunc)) && !file_exists(dirname(__FILE__)."/../data/config.php")){
+        if(($disFunc || !preg_match('/phpinfo/i',$disFunc)) && !file_exists(__DIR__."/../data/config.php")){
             $phpinfo = '<a href="?phpinfo=true">查看phpinfo</a>&nbsp;|&nbsp;';
         }else{
             $phpinfo = null;

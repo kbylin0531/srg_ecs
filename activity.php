@@ -17,7 +17,7 @@
 define('IN_ECS', true);
 
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 require_once(ROOT_PATH . 'includes/lib_order.php');
 include_once(ROOT_PATH . 'includes/lib_transaction.php');
 

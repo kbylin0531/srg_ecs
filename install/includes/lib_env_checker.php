@@ -103,7 +103,7 @@ function check_templates_priv($templates_root)
  * @access  public
  * @param   void
  *
- * @return void
+ * @return string
  */
 function check_rename_priv()
 {
@@ -135,5 +135,3 @@ function check_rename_priv()
     }
     return $msgs;
 }
-
-?>

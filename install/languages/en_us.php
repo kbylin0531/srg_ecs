@@ -159,5 +159,3 @@ $_LANG['js_languages']['setup_ucenter'] = 'Register to UCenter............';
 $_LANG['js_languages']['password_invaild'] = 'Must contain numbers and letters!';
 $_LANG['js_languages']['password_short'] = 'Should not be less than 8!';
 $_LANG['js_languages']['password_not_eq'] = 'The two passwords did not match.';
-
-?>

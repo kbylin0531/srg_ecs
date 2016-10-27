@@ -11,13 +11,9 @@
  * ============================================================================
  * $Author: liubo $
  * $Id: cls_ecshop.php 17217 2011-01-19 06:29:08Z liubo $
-*/
+ */
 
-if (!defined('IN_ECS'))
-{
-    die('Hacking attempt');
-}
-
+defined('IN_ECS') or die('Hacking attempt');
 define('APPNAME', 'ECSHOP');
 define('VERSION', 'v3.0.0');
 define('RELEASE', '20160518');
@@ -25,27 +21,26 @@ define('RELEASE', '20160518');
 class ECS
 {
     var $db_name = '';
-    var $prefix  = 'ecs_';
+    var $prefix = 'ecs_';
 
     /**
      * 构造函数
      *
      * @access  public
-     * @param   string      $ver        版本号
-     *
-     * @return  void
+     * @param $db_name
+     * @param $prefix
      */
-    function ECS($db_name, $prefix)
+    function __construct($db_name, $prefix)
     {
         $this->db_name = $db_name;
-        $this->prefix  = $prefix;
+        $this->prefix = $prefix;
     }
 
     /**
      * 将指定的表名加上前缀后返回
      *
      * @access  public
-     * @param   string      $str        表名
+     * @param   string $str 表名
      *
      * @return  string
      */
@@ -58,7 +53,7 @@ class ECS
      * ECSHOP 密码编译方法;
      *
      * @access  public
-     * @param   string      $pass       需要编译的原始密码
+     * @param   string $pass 需要编译的原始密码
      *
      * @return  string
      */
@@ -80,42 +75,30 @@ class ECS
         $protocol = $this->http();
 
         /* 域名或IP地址 */
-        if (isset($_SERVER['HTTP_X_FORWARDED_HOST']))
-        {
+        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
             $host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-        }
-        elseif (isset($_SERVER['HTTP_HOST']))
-        {
+        } elseif (isset($_SERVER['HTTP_HOST'])) {
             $host = $_SERVER['HTTP_HOST'];
-        }
-        else
-        {
+        } else {
             /* 端口 */
-            if (isset($_SERVER['SERVER_PORT']))
-            {
+            if (isset($_SERVER['SERVER_PORT'])) {
                 $port = ':' . $_SERVER['SERVER_PORT'];
 
-                if ((':80' == $port && 'http://' == $protocol) || (':443' == $port && 'https://' == $protocol))
-                {
+                if ((':80' == $port && 'http://' == $protocol) || (':443' == $port && 'https://' == $protocol)) {
                     $port = '';
                 }
-            }
-            else
-            {
+            } else {
                 $port = '';
             }
 
-            if (isset($_SERVER['SERVER_NAME']))
-            {
+            if (isset($_SERVER['SERVER_NAME'])) {
                 $host = $_SERVER['SERVER_NAME'] . $port;
-            }
-            elseif (isset($_SERVER['SERVER_ADDR']))
-            {
+            } elseif (isset($_SERVER['SERVER_ADDR'])) {
                 $host = $_SERVER['SERVER_ADDR'] . $port;
             }
         }
 
-        return $protocol . $host;
+        return isset($host) ? $protocol . $host : $protocol;
     }
 
     /**
@@ -123,18 +106,17 @@ class ECS
      *
      * @access  public
      *
-     * @return  void
+     * @return  string
      */
     function url()
     {
         $curr = strpos(PHP_SELF, ADMIN_PATH . '/') !== false ?
-                preg_replace('/(.*)(' . ADMIN_PATH . ')(\/?)(.)*/i', '\1', dirname(PHP_SELF)) :
-                dirname(PHP_SELF);
+            preg_replace('/(.*)(' . ADMIN_PATH . ')(\/?)(.)*/i', '\1', dirname(PHP_SELF)) :
+            dirname(PHP_SELF);
 
         $root = str_replace('\\', '/', $curr);
 
-        if (substr($root, -1) != '/')
-        {
+        if (substr($root, -1) != '/') {
             $root .= '/';
         }
 
@@ -146,7 +128,7 @@ class ECS
      *
      * @access  public
      *
-     * @return  void
+     * @return  string
      */
     function http()
     {
@@ -162,12 +144,9 @@ class ECS
      */
     function data_dir($sid = 0)
     {
-        if (empty($sid))
-        {
+        if (empty($sid)) {
             $s = 'data';
-        }
-        else
-        {
+        } else {
             $s = 'user_files/';
             $s .= ceil($sid / 3000) . '/';
             $s .= $sid % 3000;
@@ -184,12 +163,9 @@ class ECS
      */
     function image_dir($sid = 0)
     {
-        if (empty($sid))
-        {
+        if (empty($sid)) {
             $s = 'images';
-        }
-        else
-        {
+        } else {
             $s = 'user_files/';
             $s .= ceil($sid / 3000) . '/';
             $s .= ($sid % 3000) . '/';
@@ -199,5 +175,3 @@ class ECS
     }
 
 }
-
-?>

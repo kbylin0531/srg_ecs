@@ -16,7 +16,7 @@
 define('IN_ECS', true);
 define('INIT_NO_USERS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 if ((DEBUG_MODE & 2) != 2)
 {

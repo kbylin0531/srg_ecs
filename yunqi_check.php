@@ -14,7 +14,7 @@
 */
 
 define('IN_ECS', true);
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 require(ROOT_PATH . 'includes/cls_certificate.php');
 $cert = new certificate();
 $installer_lang = isset($_REQUEST['lang']) ? trim($_REQUEST['lang']) : 'zh_cn';

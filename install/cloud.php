@@ -14,7 +14,7 @@
  */
 
 define('IN_ECS', true);
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 session_start();
 require(ROOT_PATH . 'includes/cls_ecshop.php');
 require(ROOT_PATH . 'includes/cls_transport.php');

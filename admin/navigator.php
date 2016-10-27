@@ -14,7 +14,7 @@
  */
 
 define('IN_ECS', true);
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 admin_priv('navigator');
 

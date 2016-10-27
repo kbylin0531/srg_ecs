@@ -14,7 +14,7 @@
  * $Id: cls_template.php 16882 2009-12-14 09:22:19Z liubo $
  */
 
-class template
+class template34343
 {
     /**
     * 鐢ㄦ潵瀛樺偍鍙橀噺鐨勭┖闂

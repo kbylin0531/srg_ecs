@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 $goods_id = !empty($_GET['id']) ? intval($_GET['id']) : '';
 $act = !empty($_GET['act']) ? $_GET['act'] : '';

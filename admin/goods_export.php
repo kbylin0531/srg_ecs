@@ -16,7 +16,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 if ($_REQUEST['act'] == 'goods_export')
 {

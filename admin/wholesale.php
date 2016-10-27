@@ -14,7 +14,7 @@
  */
 
 define('IN_ECS', true);
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 include_once('../includes/lib_goods.php');
 
 /*------------------------------------------------------ */

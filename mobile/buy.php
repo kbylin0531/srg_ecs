@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-include_once(dirname(__FILE__) . '/includes/init.php');
+include_once(__DIR__ . '/includes/init.php');
 include_once(ROOT_PATH . 'includes/lib_order.php');
 
 $act = isset($_REQUEST['act']) ? $_REQUEST['act'] : '';

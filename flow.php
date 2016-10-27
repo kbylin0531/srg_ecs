@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 require(ROOT_PATH . 'includes/lib_order.php');
 
 /* 载入语言文件 */

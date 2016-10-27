@@ -1,6 +1,6 @@
 <?php
-include_once(dirname(__FILE__)."/response.php");
-include_once(dirname(__FILE__)."/request.php");
+include_once(__DIR__."/response.php");
+include_once(__DIR__."/request.php");
 
 class oauth2{
     protected $token_type = 'Bearer';

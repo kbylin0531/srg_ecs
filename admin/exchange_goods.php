@@ -15,7 +15,7 @@
 
 define('IN_ECS', true);
 
-require(dirname(__FILE__) . '/includes/init.php');
+require(__DIR__ . '/includes/init.php');
 
 /*初始化数据交换对象 */
 $exc   = new exchange($ecs->table("exchange_goods"), $db, 'goods_id', 'exchange_integral');

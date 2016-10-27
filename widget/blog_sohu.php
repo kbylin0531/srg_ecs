@@ -16,7 +16,7 @@
 define('IN_ECS', true);
 define('INIT_NO_USERS', true);
 define('INIT_NO_SMARTY', true);
-require(dirname(dirname(__FILE__)) . '/includes/init.php');
+require(dirname(__DIR__) . '/includes/init.php');
 include_once(ROOT_PATH . 'includes/cls_json.php');
 
 $num = !empty($_GET['num']) ? intval($_GET['num']) : 10;

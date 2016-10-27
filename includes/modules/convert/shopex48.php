@@ -67,7 +67,7 @@ class shopex48
         $this->sdb = $sdb;
         $this->sprefix = $sprefix;
         $this->sroot = $sroot;
-        $this->troot = str_replace('/includes/modules/convert', '', str_replace('\\', '/', dirname(__FILE__)));
+        $this->troot = str_replace('/includes/modules/convert', '', str_replace('\\', '/', __DIR__));
         $this->tdocroot = str_replace('/' . ADMIN_PATH, '', dirname(PHP_SELF));
         $this->scharset = $scharset;
         if (EC_CHARSET == 'utf-8')

@@ -26,7 +26,7 @@ if (__FILE__ == '')
 }
 
 /* 取得当前ecshop所在的根目录 */
-define('ROOT_PATH', str_replace('api', '', str_replace('\\', '/', dirname(__FILE__))));
+define('ROOT_PATH', str_replace('api', '', str_replace('\\', '/', __DIR__)));
 
 /* 初始化设置 */
 @ini_set('memory_limit',          '16M');
