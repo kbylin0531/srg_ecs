@@ -1,0 +1,91 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-9
+ * Time: 下午2:14
+ */
+
+namespace Sharin\Deprecated;
+use Sharin\Exceptions\ParameterInvalidException;
+use Sharin\Utils;
+
+
+/**
+ * Trait I
+ * manage the instantiation of this class
+ * @package Sharin
+ */
+trait I {
+
+    /**
+     * @var array 驱动列表
+     */
+    private static $_is = [];
+
+    /**
+     * 更具驱动名称和参数获取驱动实例
+     * Get instance of this class of special driver by config
+     * @param array|int|float|string|null $config it will convered to identify
+     * @param string $clsnm class name ,it will always be driver name if value set to re-null
+     * @param string|int $identify Instance identify
+     * @return object
+     */
+    public static function getInstance($config=null,$clsnm=null,$identify=null){
+        $clsnm === null and $clsnm = static::class;
+        if(null === $identify){
+            switch (gettype($config)){
+                case TYPE_ARRAY:
+                    $identify = Utils::dataSign($config);
+                    break;
+                case TYPE_FLOAT:
+                case TYPE_INT:
+                case TYPE_STR:
+                    $identify = (string) $config;
+                    break;
+                case TYPE_NULL:
+                    $identify = 0;
+                    break;
+                default:
+                    throw new ParameterInvalidException($config);
+            }
+        }
+
+        if(!isset(self::$_is[$clsnm][$identify])){
+            self::$_is[$clsnm][$identify] = (null !== $config ? new $clsnm($config) :new $clsnm());
+        }
+        return self::$_is[$clsnm][$identify];
+    }
+
+    /**
+     * 判断是否存在实例
+     * @param array|int|float|string|null $config it will convered to identify
+     * @param string $clsnm class name ,it will always be driver name if value set to re-null
+     * @return bool
+     * @throws ParameterInvalidException
+     */
+    public static function hasInstance($config=null,$clsnm=null){
+        isset($clsnm) or $clsnm = static::class;
+        if(!isset(self::$_is[$clsnm])){
+            self::$_is[$clsnm] = [];
+            return false;
+        }
+        //get identify
+        switch (gettype($config)){
+            case TYPE_ARRAY:
+                $identify = Utils::dataSign($config);
+                break;
+            case TYPE_FLOAT:
+            case TYPE_INT:
+            case TYPE_STR:
+                $identify = (string) $config;
+                break;
+            case TYPE_NULL:
+                $identify = 0;
+                break;
+            default:
+                throw new ParameterInvalidException($config);
+        }
+        return isset(self::$_is[$clsnm][$identify]);
+    }
+}

@@ -1,0 +1,22 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: lich4ung
+ * Date: 9/13/16
+ * Time: 8:21 AM
+ */
+
+namespace Sharin\Exceptions\IO;
+
+
+use Sharin\Exception;
+
+/**
+ * Class WriteAccessDenyException
+ * 拒绝写入文件系统异常
+ * @package Sharin\Exceptions\IO
+ */
+class WriteAccessDenyException extends Exception
+{
+
+}

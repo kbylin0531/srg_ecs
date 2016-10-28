@@ -1,0 +1,85 @@
+<?php
+/**
+ * Powered by linzhv@qq.com.
+ * Github: git@github.com:linzongho/sharin.git
+ * User: root
+ * Date: 16-9-3
+ * Time: 下午6:34
+ */
+
+namespace Sharin\Library;
+use Sharin\Core\Dao;
+
+/**
+ * Class ActiveRecord
+ * @property ...
+ * @package Sharin\Library
+ */
+class ActiveRecord {
+
+    /**
+     * @var string table prefix
+     */
+    protected $prefix = '';
+
+    /**
+     * @var string table name without prefix
+     */
+    protected $table = '';
+
+    /**
+     * @var string primary key
+     */
+    protected $pk = 'id';
+
+    /**
+     * @var array 数据表字段（健为字段名称，值为字段默认值）
+     */
+    protected $fields = [];
+
+    /**
+     * @var array 设置的属性列表
+     */
+    protected $attrs = [];
+    /**
+     * @var Dao
+     */
+    protected $dao = null;
+
+    /**
+     * ActiveRecord constructor.
+     * @param Dao|null $dao
+     */
+    public function __construct(Dao $dao=null) {
+        $this->dao = $dao ? $dao : Dao::getInstance();
+    }
+
+    /**
+     * @param $name
+     * @return mixed|null
+     */
+    public function __get($name) {
+        return isset($this->attrs[$name]) ? $this->attrs[$name] : null;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    public function __set($name, $value) {
+        $this->attrs[$name] = $value;
+    }
+
+    public function clear(){}
+
+    public function create(){}
+
+    public function delete(){}
+
+    public function update(){}
+
+    public function select(){}
+
+    public function find(){}
+
+}

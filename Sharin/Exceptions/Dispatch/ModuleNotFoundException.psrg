@@ -1,0 +1,24 @@
+<?php
+/**
+ * Github: https://github.com/linzongho/Sharin
+ * Email:linzongho@gmail.com
+ * User: asus
+ * Date: 8/24/16
+ * Time: 7:52 PM
+ */
+
+namespace Sharin\Exceptions\Dispatch;
+
+
+use Sharin\Core\Response;
+use Sharin\Exception;
+
+class ModuleNotFoundException extends Exception
+{
+
+    public function __construct($name){
+        parent::__construct();
+        Response::sendHttpStatus(404,"module '$name' not found ");
+    }
+
+}

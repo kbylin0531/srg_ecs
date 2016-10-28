@@ -1,0 +1,17 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-11
+ * Time: 下午2:37
+ */
+
+namespace Sharin\Exceptions;
+
+
+use Sharin\Exception;
+
+class ConfigParseFailedException extends Exception
+{
+
+}

@@ -1,0 +1,26 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: linzh
+ * Date: 2016/10/11
+ * Time: 23:33
+ */
+
+namespace Sharin\Library\Helper;
+
+/**
+ * Class Data 数据相关
+ * @package Sharin\Library\Helper
+ */
+class Data {
+
+    /**
+     * 数据签名认证
+     * @param  array  $data 被认证的数据
+     * @return string       签名
+     */
+    public static function dataSign(array $data) {
+        ksort($data);
+        return sha1(http_build_query($data));
+    }
+}

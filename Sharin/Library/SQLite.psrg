@@ -1,0 +1,198 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-18
+ * Time: 下午2:17
+ */
+
+namespace Sharin\Library;
+use Sharin\Exception;
+
+/**
+ * Class SQLite SQLite访问
+ * @package Sharin\Library
+ */
+class SQLite extends \PDO {
+
+    /**
+     * @var string 表名词
+     */
+    protected $tablename = 'KV';
+    /**
+     * @var string 主健名
+     */
+    protected $pk = 'ID';
+    /**
+     * @var array 惯例配置
+     */
+    protected static $config = [
+        'data'  => SR_PATH_DATA.'SQLite/',//数据存放目录
+        'default'  => 'sharin',
+    ];
+
+    public static function init(array $config){
+        $config and self::$config = array_merge(self::$config,$config);
+    }
+
+    /**
+     * 获取驱动实例
+     * @param string|null $name 数据库名称，如果时null表示获取系统默认的数据库
+     * @return SQLite
+     * @throws Exception 数据库文件不存在时抛出异常
+     */
+    public static function getInstance($name=null){
+        static $_instances = [];
+        $clsnm = static::class;// PHP5.5以下需要使用 get_called_class() 获取
+        $key = "{$clsnm}-{$name}";
+        if(!isset($_instances[$key])){
+            if(false !== ($file = self::getDatabase($name,true))){
+                $dsn = 'sqlite:'.$file;
+                $_instances[$key] = new $clsnm($dsn);
+            }else{
+                throw new Exception("database file '$file' do not exist,install failed!");
+            }
+        }
+        return $_instances[$key];
+    }
+
+    /**
+     * 获取sqlite可执行文件的路径，返回
+     * @return string|false 可执行文件不存在或者不可执行时返回false
+     */
+    protected static function getSqlite() {
+        $sqlite = SR_PATH_FRAMEWORK.'/Binary/sqlite3';
+        if(!is_file($sqlite) or !is_executable($sqlite)){
+            return false;
+        }
+        return $sqlite;
+    }
+
+    /**
+     * @param string $name 数据库名称
+     * @param bool $must_exist 是否要求数据库文件必须存在（并且可读）
+     * @return false|string 数据库文件不存在时返回false,否则返回数据库文件的路径
+     */
+    protected static function getDatabase($name=null,$must_exist=true){
+        $name === null and $name = self::$config['default'];
+        $file = self::$config['data'].'/'.$name.'.db';
+        if($must_exist){
+            if(!is_file($file) or !is_readable($file)){
+                return false;
+            }
+        }
+        return $file;
+    }
+
+    /**
+     * 判断数据库文件是否安装完毕
+     * @param string $name 数据库名称
+     * @return bool
+     */
+    public static function isInstalled($name){
+        return self::getDatabase($name,true) !== false;
+    }
+
+    /**
+     * @param $name
+     * @param $sql
+     * @return bool 是否创建成功取决于
+     * @throws Exception
+     */
+    public static function install($name,$sql=null){
+        $dbfile = self::getDatabase($name,false);
+        if(is_file($dbfile)){
+            //文件已经存在的时候不默认覆盖
+            throw new Exception("database file '$dbfile' has been exist,install failed!");
+        }
+        if(false === ($sqlite = self::getSqlite())){
+            //可执行文件不存在或者没有可执行权限时，抛出异常
+            throw new Exception("No executable sqlite3 for using!");
+        }
+
+        //默认的表创建SQL
+        $sql or $sql ='CREATE TABLE KV (
+            ID      VARCHAR NOT NULL PRIMARY KEY ,
+            NAME    TEXT    NOT NULL       );';
+        //临时SQL文件，用于保存SQL 作为创建的参数
+        $sqlfile_temp = __DIR__.'/.sql.temp';
+
+        $sql_dir = dirname($dbfile);
+        if(!is_dir($sql_dir)){
+            mkdir($sql_dir,0777,true);
+        }
+
+        if(file_put_contents($sqlfile_temp,$sql)){
+            exec("$sqlite {$dbfile} < {$sqlfile_temp}");
+        }
+        is_file($sqlfile_temp) and unlink($sqlfile_temp);
+        return is_file($dbfile);
+    }
+
+
+    protected $fields = [];
+
+    public function __get($name)
+    {
+        return isset($this->fields[$name])?$this->fields[$name] : '';
+    }
+    public function __set($name, $value) {
+        if(key_exists($name,$this->fields)) {
+            $this->fields[$name] = $value;
+        }else{
+            throw new \Exception("字段'{$name}'不存在");
+        }
+    }
+
+    /**
+     * 查询数据
+     * @param string $where where字句
+     * @return array 返回查询结果
+     */
+    public function select($where=''){
+        $sql = 'select * from '.$this->tablename;
+        $where and $sql .= " where $where ";
+        return $this->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * 查询所有相关记录
+     * @param string|int $pk 主键值
+     * @return array
+     */
+    public function find($pk){
+        return $this->select(" {$this->pk} = $pk ");
+    }
+
+    /**
+     * 添加数据
+     * @param array|null $fields
+     * @return int|false 添加失败时返回false，否则返回添加的记录数目
+     */
+    public function create(array $fields=null){
+        null === $fields and $fields = $this->fields;
+        $holder = "(".implode(",",array_keys($fields)).")";
+        $fields = "('".implode("','",$fields)."')";
+        $sql = "insert into {$this->tablename} $holder values $fields ;";
+        return $this->exec($sql);
+    }
+
+    public function delete($pkey){
+        $sql = "delete from {$this->tablename} where {$this->pk} = '$pkey';";
+        return $this->exec($sql);
+    }
+
+    public function update($pkey, array $fields){
+        $sql = "update {$this->tablename} set";
+        foreach ($fields as $key=>$val){
+            $sql .= " $key = '$val',";
+        }
+        $sql = rtrim($sql,',')." where {$this->pk} = '$pkey';";
+        return $this->exec($sql);
+    }
+
+    public function getError(){
+        $info = $this->errorInfo();
+        return $info[2];
+    }
+}

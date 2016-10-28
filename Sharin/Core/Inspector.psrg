@@ -1,0 +1,31 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-13
+ * Time: 下午3:59
+ */
+
+namespace Sharin\Core;
+
+/**
+ * Class Inspector 巡查者,检查运行环境或者文件目录比较
+ * @package Sharin\Core
+ */
+class Inspector {
+
+    /**
+     * 检查目录设置情况
+     * 目录不存在时会依据参数二进行创建
+     * @param string $dir
+     * @param bool $buildifnotexist
+     * @return bool 返回目录最终存在与否
+     */
+    public static function checkDir(string $dir,bool $buildifnotexist=false): bool {
+
+
+    }
+
+
+
+}

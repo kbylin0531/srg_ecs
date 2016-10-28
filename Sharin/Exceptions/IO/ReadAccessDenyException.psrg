@@ -1,0 +1,22 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: lich4ung
+ * Date: 9/13/16
+ * Time: 8:20 AM
+ */
+
+namespace Sharin\Exceptions\IO;
+
+
+use Sharin\Exception;
+
+/**
+ * Class ReadAccessDenyException
+ * 拒绝读取文件系统异常
+ * @package Sharin\Exceptions\IO
+ */
+class ReadAccessDenyException extends Exception
+{
+
+}

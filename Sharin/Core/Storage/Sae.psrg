@@ -1,0 +1,177 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 9/16/16
+ * Time: 4:19 PM
+ */
+
+namespace Sharin\Core\Storage;
+
+//* SAE Storage系统的使用
+//    echo '<pre>';
+//    $fname = 'saestor://runtime/bolatu.txt';
+//    file_put_contents($fname,'asd');
+//
+//    var_dump(
+//        file_get_contents($fname),
+//        file_exists($fname),
+//        unlink($fname),
+//        file_exists($fname)
+//    ) ;
+//    exit( '-------');
+/**
+ * Class SaeDriver SAE运行环境下的文件驱动类
+ * 拥有自己的一套地址映射方案
+ * @package System\Core\StorageDriver
+ */
+class Sae implements StorageInterface {
+    /**
+     * SAE环境下将文件名称 调整为 Storage服务对应的目录
+     * @param string $filename 文件名称
+     * @return void
+     */
+    private function translateIntoWrappers(&$filename){
+        static $_pathcache = array();
+        static $basepathstrlen = null;
+        null === $basepathstrlen and $basepathstrlen = strlen(SR_PATH_BASE);
+        if(isset($_pathcache[$filename])){
+            $filename = $_pathcache[$filename];
+            return;
+        }
+        $filename = str_replace('/','||',strtolower(substr($filename,$basepathstrlen+8)));//将'runtime/'也删除
+        $filename = "saestor://runtime/{$filename}";
+    }
+
+    /**
+     * 获取文件内容
+     * @param string $filepath 文件路径
+     * @return string|null 文件不存在时返回null
+     */
+    public function read($filepath){
+        $this->translateIntoWrappers($filepath);
+        return parent::read($filepath);
+    }
+
+    /**
+     * 将指定内容写入到文件中
+     * @param string $filepath 文件路径
+     * @param string $content 要写入的文件内容
+     * @return int 返回写入的字节数目
+     */
+    public function write($filepath,$content){
+        $this->translateIntoWrappers($filepath);
+        return parent::write($filepath,$content);
+    }
+
+    /**
+     * 将指定内容追加到文件中
+     * @param string $filepath 文件路径
+     * @param string $content 要写入的文件内容
+     * @return int 返回写入的字节数目
+     * @throws FileWriteFailedException
+     */
+    public function append($filepath,$content){
+        $this->translateIntoWrappers($filepath);
+        if(is_file($filepath)){
+            $content =  $this->read($filepath).$content;
+        }
+        $bytes = file_put_contents($filepath,$content);
+        if(false === $bytes){
+            throw new FileWriteFailedException($filepath);
+        }
+        return $bytes;
+    }
+    /**
+     * 确定文件是否存在
+     * @param string $filepath 文件路径
+     * @return bool
+     */
+    public function has($filepath){
+        $this->translateIntoWrappers($filepath);
+        return true;
+    }
+
+    /**
+     * 删除文件
+     * @param string $filepath
+     * @return bool
+     */
+    public function unlink($filepath){
+        $this->translateIntoWrappers($filepath);
+        return parent::write($filepath,'');
+    }
+
+    /**
+     * 读取文件信息
+     * 可以使用stat获取信息
+     * @param string $filepath  文件路径
+     * @param null $type
+     * @return mixed
+     */
+    public function info($filepath,$type=null){
+        $this->translateIntoWrappers($filepath);
+        return parent::info($filepath,$type);
+    }
+
+    /**
+     * 读取文件夹内容，并返回一个数组(不包含'.'和'..')
+     * array(
+     *      //文件内容  => 文件内容
+     *      'filename' => 'file full path',
+     * );
+     * @param string $dirpath
+     * @return array
+     */
+    public function readFolder($dirpath){
+        $this->translateIntoWrappers($dirpath);
+        return parent::readFolder($dirpath);
+    }
+    /**
+     * 删除文件夹
+     * @param string $dirpath 文件夹名路径
+     * @param bool $recursion 是否递归删除
+     * @return mixed
+     */
+    public function removeFolder($dirpath,$recursion=false){
+        $this->translateIntoWrappers($dirpath);
+        return parent::removeFolder($dirpath,$recursion);
+    }
+    /**
+     * 创建文件夹
+     * 如果文件夹已经存在，则修改权限
+     * @param string $dirpath 文件夹路径
+     * @param int $auth 文件权限，八进制表示
+     * @return mixed
+     */
+    public function makeFolder($dirpath,$auth = 0755){
+        $this->translateIntoWrappers($dirpath);
+        return parent::makeFolder($dirpath,$auth);
+    }
+
+
+    public function mtime($filepath, $mtime = null)
+    {
+        // TODO: Implement mtime() method.
+    }
+
+    public function size($filepath)
+    {
+        // TODO: Implement size() method.
+    }
+
+    public function mkdir($dirpath, $auth = 0755)
+    {
+        // TODO: Implement mkdir() method.
+    }
+
+    public function touch($filepath, $mtime = null, $atime = null)
+    {
+        // TODO: Implement touch() method.
+    }
+
+    public function chmod($filepath, $auth = 0755)
+    {
+        // TODO: Implement chmod() method.
+    }
+}

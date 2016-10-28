@@ -1,0 +1,129 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-20
+ * Time: 下午1:03
+ */
+
+namespace Sharin\Library;
+
+
+use Sharin\Exception;
+
+/**
+ * Class Database 数据库访问对象
+ *
+ ************************** 事务功能 *****************************************************
+ * @method bool beginTransaction() 开启事务
+ * @method bool commit() 提交事务
+ * @method bool rollback() 回滚事务
+ * @method bool inTransaction()  确认是否在事务中
+ *
+ * @package Sharin\Library
+ */
+class Database {
+
+    /**
+     * 数据访问对象
+     * 每个模型都对应一个
+     * @var Dao
+     */
+    protected $_dao = null;
+
+    /**
+     * @var string 当前的数据库访问对象对应的数据表的名称
+     */
+    protected $tablename = null;
+    /**
+     * @var string|array 主键名称,如果是array则为复合主键
+     */
+    protected $pk = 'id';
+
+    /**
+     * 最近错误信息
+     * 可以通过设置 $this->error 来设置错误信息
+     * 访问错误信息可以通过 $this->error();来获取错误信息，该方法获取后会清空error属性（即连续两次调用$this->error()前次可以获取对应的错误信息，后一次一定获取的是null）
+     * @var string
+     */
+    protected $error = '';
+
+    /**
+     * 上一次执行的SQL语句
+     * @var string
+     */
+    protected $_lastSql = null;
+    /**
+     * 返回上一次查询的SQL输入参数
+     * @var array
+     */
+    protected $_lastParams = null;
+
+    /**
+     * 获取上一次执行的SQL
+     * @return null|string
+     */
+    public function getLastSql(){
+        return $this->_lastSql;
+    }
+
+    public function getLastParams(){
+        return $this->_lastParams;
+    }
+    /**
+     * 获取主键名称
+     * @access public
+     * @return array|string
+     */
+    public function getPk() {
+        return $this->pk;
+    }
+    /**
+     * 获取表的名称
+     * @return string
+     */
+    public function getTable(){
+        return $this->tablename;
+    }
+
+    /**
+     * 获取上一次调用的错误信息
+     * 返回错误信息后会清空错误标志位
+     * @return string
+     */
+    public function getError(){
+        //检查是否设置了error
+        if(null === $this->error){
+            $this->error = $this->_dao->getError();
+        }
+        //每次获取error之后清空操作
+        $error = $this->error;
+        $this->error = '';
+        return $error;
+    }
+
+    /**
+     * Model constructor.
+     * 单参数为非null时就指定了该表的数据库和字段,来对制定的表进行操作
+     * Model constructor.
+     * @param mixed $index 数据库配置的主键,通过设置该参数可以指定模型使用的是哪个数据库
+     * @throws Exception
+     */
+    public function __construct($index=null){
+        $this->_dao = Dao::getInstance($index);
+    }
+
+    /**
+     * 调用不存在的方法时 转至 dao对象上调用
+     * 需要注意的是，访问了禁止访问的方法时将返回false
+     * @param string $name 方法名称
+     * @param array $args 方法参数
+     * @return false|mixed
+     */
+    public function __call($name,$args){
+        return call_user_func_array([$this->_dao,$name],$args);
+    }
+
+
+
+}

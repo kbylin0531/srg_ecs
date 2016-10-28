@@ -1,0 +1,15 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-17
+ * Time: 下午3:16
+ */
+
+namespace Sharin\Exceptions\IO;
+
+use Sharin\Exception;
+
+class FileExistException extends Exception {
+
+}

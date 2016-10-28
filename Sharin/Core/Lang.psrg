@@ -1,0 +1,182 @@
+<?php
+/**
+ * Email: linzongho@gmail.com
+ * Github: https://github.com/linzongho/Sharin
+ * User: asus
+ * Date: 8/22/16
+ * Time: 3:29 PM
+ */
+namespace Sharin\Core;
+use Sharin\Component;
+use Sharin\Configger;
+use Sharin\Exceptions\IO\FileNotFoundException;
+use Sharin\Exceptions\IO\FileWriteFailedException;
+
+/**
+ * Class LangHelper 语言助手
+ *
+ * 缓存设计：
+ *  假设
+ *      OUTER 代表用户配置语言包目录
+ *      INNER 代表框架内置语言包目录
+ *      CACHE 代表语言包缓存的目录
+ *
+ *  初始化过程中首先首先获取 OUTER 的修改时间是否大于 CACHE 的修改时间，是的话说明用户对进行了更新
+ *  这是程序会读取全部的语言包并加载到内存中（语言包不至于有几兆的大小，这个上限是允许的！），并且会将
+ *  flag置为true表示脚本结束后会将内容刷新到缓存区
+ *
+ * 注意：
+ *  ①(已经在loadLang方法中得到修缮 ： 先检查缓存是否存在，在检查是否过期)如果误删了Data/lang下的缓存文件会导致该文件夹的修改日期大于根目录下Lang目录的修改日期，如果不手动调用setlang将不会自动触发缓存更新操作
+ *   解决办法是将根目录下Lang目录更新到最新（可以打开其中一个文件键入一个空格） ==> 嫌麻烦?谁让你手贱来着!
+ *    ps:不同于配置文件的自动检测，语言助手类初始化时并不载入任何语言包的缓存，这时因为语言可能不止一种（总不能把无关的一些语言）
+ *
+ *
+ * 提示：
+ * 如果xx.php中想要进行分类如：
+ *  food,animal...
+ * 可以拆分成
+ *  zh-cn/food.inc
+ *  zh-cn/animal.inc
+ * 然后在 zh-cn.php 中include 它们
+ * 这样做可以方便惯例，因为缓存的缘故效率不会受到影响
+ *
+ * @package System\Core
+ */
+class Lang extends Component {
+
+    protected static $name = 'lang';
+
+    protected static $config = [];
+
+    protected static $flag = false;
+
+    protected static $outer_upd_time = null;
+
+    public static function initializationize(array $config = null){
+        parent::initializationize([
+            //语言包列表
+            'LANG_LIST'     => [
+                'en-us',
+                'zh-cn',
+                'zh-tw',
+            ],
+            //默认的语言
+            'DEFAULT_LANG'  => LANG_ZH_CN,        //默认的语言类型
+
+            //语言包路径
+            'PATH_INNER'    => SR_PATH_FRAMEWORK.'/I18n',//预定义语言包
+            'PATH_OUTER'    => SR_PATH_BASE.'/I18n',    //用户定义语言包路径
+            //语言包缓存路径
+            'PATH_CACHE'    => SR_PATH_RUNTIME.'/I18n',//语言包缓存路径
+
+        ]);
+        self::$config = self::convention();
+
+        //只检查外部语言包是否发生变化
+        $outerpath = self::$config['PATH_OUTER'];
+        $cachepath = self::$config['PATH_CACHE'];
+        self::$outer_upd_time = Storage::mtime($cachepath);
+        if(Storage::mtime($outerpath) > self::$outer_upd_time){
+            //读取全部数据，并标记脚本结束时的保存操作
+            foreach (self::$config['LANG_LIST'] as $lang) {
+                self::loadLang($lang);
+            }
+            self::$flag = true;
+        }else{
+            self::loadLang();
+            self::$flag = false;
+        }
+        register_shutdown_function([self::class,'storeLang']);
+    }
+
+    /**
+     * 语言包缓存
+     * @var array
+     */
+    private static $cache = [];
+
+
+    public static function get($key){
+        return $key;
+    }
+
+    /**
+     * 获取语言包数组
+     * @param string $type null时获取默认
+     * @return array
+     * @throws FileNotFoundException
+     */
+    public static function getLang(string $type=null){
+        isset($type) or $type = self::$config['DEFAULT_LANG'];
+        if(!self::$cache[$type]){
+            return self::loadLang($type);
+        }
+        return self::$cache[$type];
+    }
+
+    public static function setLang(string $name,string $value,$type=null){
+        isset($type) or $type = self::$config['DEFAULT_LANG'];
+        empty(self::$cache[$type]) or self::$cache[$type] = [];
+        self::$cache[$type][$name] = $value;
+        self::$flag = true;
+    }
+
+    /**
+     * 保存语言数据（脚本运行结束时自动回调，无需手动调用）
+     * @param string|null $lang
+     * @param array|null $data
+     * @throws FileWriteFailedException
+     */
+    public static function storeLang(string $lang=null,array $data=null){
+        if(self::$flag === true){
+            //只有发生了改变的情况下才会主动去保存修改
+            if(null === $lang){
+                foreach (self::$cache as $lang => $data) {
+                    self::storeLang($lang,$data);
+                }
+            }else{
+                if($data or $data = isset(self::$cache[$lang]) ? self::$cache[$lang] : []){
+                    $path = self::$config['PATH_CACHE']."/{$lang}.cache.php";
+                    if(!Storage::write($path,'<?php return '.var_export($data,true).';')){
+                        throw new FileWriteFailedException($path);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 加载、获取语言包
+     * @param string $lang 语言包类型
+     * @return array
+     * @throws FileNotFoundException
+     */
+    public static function loadLang(string $lang=null){
+        isset($lang) or $lang = self::$config['DEFAULT_LANG'];
+
+        $cachefile = self::$config['PATH_CACHE']."/{$lang}.cache.php";
+        if(!Storage::has($cachefile,Storage::READ_ACCESS) or Storage::mtime($cachefile) < self::$outer_upd_time){
+            //文件不存在或者文件更新时间小于外部文件夹修改时间
+            self::$cache[$lang] = [];
+            $mainfile = "/{$lang}.php";
+            $innerpath = self::$config['PATH_INNER'].$mainfile;
+            $outerpath = self::$config['PATH_OUTER'].$mainfile;
+
+            //加载框架内置语言包
+            if(Storage::has($innerpath,Storage::READ_ACCESS)){
+                self::$cache[$lang] = Configger::parse($innerpath);
+            }
+
+            //加载用户自定义语言包
+            if(Storage::has($outerpath,Storage::READ_ACCESS)){
+                self::$cache[$lang] = array_merge(self::$cache[$lang],Configger::parse($outerpath));
+            }
+            self::$flag = true;
+        }else{
+            self::$cache[$lang] = Configger::parse($cachefile,Configger::TYPE_PHP);
+        }
+
+        return self::$cache[$lang];
+    }
+
+}

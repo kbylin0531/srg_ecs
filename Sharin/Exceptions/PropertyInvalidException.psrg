@@ -1,0 +1,21 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-18
+ * Time: 下午2:34
+ */
+
+namespace Sharin\Exceptions;
+
+
+use Sharin\Exception;
+
+/**
+ * Class PropertyInvalidException 魔术方法访问了不存在或者无法访问的属性时会抛出的异常
+ * @package Sharin\Exceptions
+ */
+class PropertyInvalidException extends Exception
+{
+
+}

@@ -1,0 +1,59 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2015/12/20
+ * Time: 11:14
+ */
+namespace Sharin\Library\Dao;
+use PDO;
+
+class Oci extends DaoAbstract {
+
+    protected $config = [
+        'type'      => 'Oci',//数据库类型
+        'dbname'    => 'xor',//选择的数据库
+        'username'  => 'lin',
+        'password'  => '123456',
+        'host'      => '127.0.0.1',
+        'port'      => '3306',
+        'charset'   => 'UTF8',
+        'dsn'       => null,//默认先检查差DSN是否正确,直接写dsn而不设置其他的参数可以提高效率，也可以避免潜在的bug
+        'options'   => [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,//默认异常模式
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,//结果集返回形式
+        ],
+    ];
+
+    /**
+     * @param array $config
+     * @return string
+     */
+    public function buildDSN(array $config){
+        $dsn  =   'oci:dbname=//'.$config['hostname'].($config['port']?':'.$config['port']:'').'/'.$config['dbname'];
+        if(!empty($config['charset'])) {
+            $dsn  .= ';charset='.$config['charset'];
+        }
+        return $dsn;
+    }
+
+    public function escape($field)
+    {
+        // TODO: Implement escape() method.
+    }
+
+    public function getFields($tableName)
+    {
+        // TODO: Implement getFields() method.
+    }
+
+    public function getTables($dbName = null)
+    {
+        // TODO: Implement getTables() method.
+    }
+
+    protected function parseKey(&$key)
+    {
+        // TODO: Implement parseKey() method.
+    }
+}

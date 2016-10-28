@@ -1,0 +1,178 @@
+<?php
+/**
+ * Email: linzongho@gmail.com
+ * Github: https://github.com/linzongho/Sharin
+ * User: asus
+ * Date: 8/22/16
+ * Time: 11:01 AM
+ */
+namespace Sharin\Core;
+use Sharin\Component;
+use Sharin\Exceptions\Dispatch\ActionAccessDenyException;
+use Sharin\Exceptions\Dispatch\ActionParameterMissingException;
+use Sharin\Exception;
+use ReflectionMethod;
+use Sharin\Exceptions\Dispatch\ControllerNotFoundException;
+use Sharin\Exceptions\Dispatch\ModuleNotFoundException;
+use Sharin\Exceptions\MethodNotFoundException;
+
+/**
+ * Class Dispatcher 调度器
+ * @package Sharin\Core
+ */
+class Dispatcher extends Component {
+
+    const REQUEST = 0;
+    const GET     = 1;
+    const POST    = 2;
+    const PUT     = 3;
+
+    protected static $name = 'dispatcher';
+
+    public static function initializationize(array $config = null) {
+        parent::initializationize([
+            //空缺时默认补上,Done!
+            'INDEX_MODULE'      => 'Home',
+            'INDEX_CONTROLLER'  => 'Index',
+            'INDEX_ACTION'      => 'index',
+            //参数默认来自$_REQUESR
+            'PARAM_SOURCE'  => self::REQUEST,
+        ]);
+    }
+//--------------------------------------------- 通用 -------------------------------------------------------------------//
+    /**
+     * 执行控制器实例的对应方法
+     * @param object $controllerInstance 控制器实例
+     * @param ReflectionMethod $method 方法反射对象
+     * @return mixed|null
+     * @throws ActionAccessDenyException 方法非公开或者为静态方法时抛出异常
+     */
+    public static function execute($controllerInstance,\ReflectionMethod $method){
+        if (!$method->isPublic() or $method->isStatic()) {
+            throw new ActionAccessDenyException($method);
+        }
+        //方法的参数检测
+        if ($method->getNumberOfParameters()) {//有参数
+            $args = Dispatcher::fetchArguments($method);
+            //执行方法
+            $result = $method->invokeArgs($controllerInstance, $args);
+        } else {//无参数的方法调用
+            $result = $method->invoke($controllerInstance);
+        }
+        return $result;
+    }
+
+    /**
+     * 获取传递给控制器方法的参数
+     * @param \ReflectionMethod $targetMethod
+     * @return array
+     * @throws Exception
+     */
+    public static function fetchArguments(\ReflectionMethod $targetMethod){
+        $args = [];
+        if($methodParams = $targetMethod->getParameters()){
+            //获取默认的操作参数来源
+            switch(self::convention('PARAM_SOURCE')){
+                case self::REQUEST:
+                    $vars = $_REQUEST;
+                    break;
+                case self::GET:
+                    $vars = $_GET;
+                    break;
+                case self::POST:
+                    $vars = $_POST;
+                    break;
+                case self::PUT:
+                    parse_str(file_get_contents('php://input'), $vars);
+                    break;
+                default:
+                    $vars = array_merge($_GET,$_POST);//POST覆盖GET
+                    break;
+            }
+            //参数组织
+            foreach ($methodParams as $param) {
+                $paramName = $param->getName();
+                if(isset($vars[$paramName])){
+                    $args[] =   $vars[$paramName];
+                }elseif($param->isDefaultValueAvailable()){
+                    $args[] =   $param->getDefaultValue();
+                }else{
+                    throw new ActionParameterMissingException($param);
+                }
+            }
+        }
+        return $args;
+    }
+
+
+//------------------------------------------------- 内置 ---------------------------------------------------------------//
+
+    /**
+     * @var string 待调度的模块
+     */
+    private static $module = '';
+    /**
+     * @var string  待调度的控制器
+     */
+    private static $controller = '';
+    /**
+     * @var string 待调度的操作
+     */
+    private static $action = '';
+
+    /**
+     * 检查并设置默认设置
+     * @param $modules
+     * @param $ctrler
+     * @param $action
+     * @return array
+     */
+    public static function check($modules,$ctrler,$action){
+        self::$module      = $modules?$modules:self::convention('INDEX_MODULE');
+        self::$controller  = $ctrler?$ctrler:self::convention('INDEX_CONTROLLER');
+        self::$action      = $action?$action:self::convention('INDEX_ACTION');
+
+        self::$module and is_array(self::$module) and self::$module = implode('/',self::$module);
+        return [
+            'm' => self::$module,
+            'c' => self::$controller,
+            'a' => self::$action,
+        ];
+    }
+
+    /**
+     * @param array|string $modules
+     * @param array|string $ctrler
+     * @param array|string $action
+     * @return mixed
+     * @throws ControllerNotFoundException
+     * @throws MethodNotFoundException
+     * @throws ModuleNotFoundException
+     */
+    public static function dispatch($modules,$ctrler,$action){
+        $modulepath = SR_PATH_APP."/{$modules}";//linux 不识别
+        strpos($modules,'/') and $modules = str_replace('/','\\',$modules);
+        $context = [
+            'm' => $modules,
+            'c' => $ctrler,
+            'a' => $action,
+        ];
+        //模块检测
+        if(!is_dir($modulepath)){
+            Assets::parse();
+        }
+        //控制器检测
+        $className = 'Application'.($modules?"\\{$modules}":'')."\\Controller\\{$ctrler}";
+        if(!class_exists($className,true)){
+            Assets::parse();
+        }
+        //方法检测
+        $classInstance = new $className();
+        if(!method_exists($classInstance,$action)){
+            Assets::parse();
+        }
+        return Dispatcher::execute($classInstance,new \ReflectionMethod($classInstance, $action));
+    }
+
+
+}

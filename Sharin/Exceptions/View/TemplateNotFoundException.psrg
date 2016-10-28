@@ -1,0 +1,17 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-23
+ * Time: 下午3:11
+ */
+
+namespace Sharin\Exceptions\View;
+
+
+use Sharin\Exception;
+
+class TemplateNotFoundException extends Exception
+{
+
+}

@@ -1,0 +1,17 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-19
+ * Time: 上午11:24
+ */
+
+namespace Sharin\Exceptions;
+
+
+use Sharin\Exception;
+
+class PropertyEmptyException extends Exception
+{
+
+}

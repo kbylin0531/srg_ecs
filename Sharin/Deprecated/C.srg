@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-9
+ * Time: 下午2:12
+ */
+namespace Sharin\Deprecated;
+use Sharin\Core\Configger;
+use Sharin\Utils;
+
+/**
+ * Trait C
+ * manage the configuration of this class
+ *
+ * @synthesize array $config static
+ *
+ * @package Sharin
+ */
+trait C {
+
+    /**
+     * 类的静态配置
+     * @var array
+     */
+    private static $_cs = [];
+
+    /**
+     * initialize the class with config
+     * :eg the name of this method is much special to make class initialize automaticlly
+     * @return void
+     */
+    public static function __initializationize(){
+        $clsnm = static::class;
+        if(!isset(self::$_cs[$clsnm])){
+            //get convention
+            self::$_cs[$clsnm] = Utils::constant($clsnm,'CONF_CONVENTION',[]);
+
+            //load the outer config
+            $conf = \Sharin\Configger::load($clsnm);
+            $conf and self::$_cs[$clsnm] = Utils::merge(self::$_cs[$clsnm],$conf,true);
+        }
+        //auto init
+        Utils::callStatic($clsnm,'__init');
+    }
+
+    /**
+     * 获取该类的配置（经过用户自定义后）
+     * @param string|null $name 配置项名称
+     * @param mixed $replacement 找不到对应配置时的默认配置
+     * @return array
+     */
+    final protected static function getConfig($name=null,$replacement=null){
+        $clsnm = static::class;
+        isset(self::$_cs[$clsnm]) or self::$_cs[$clsnm] = [];
+        return isset($name) ? (isset(self::$_cs[$clsnm][$name])?self::$_cs[$clsnm][$name]:$replacement) : (isset(self::$_cs[$clsnm])?self::$_cs[$clsnm]:$replacement);
+    }
+
+    /**
+     * 设置运行时配置
+     * @todo:
+     * @static
+     * @param string $name
+     * @param mixed $value
+     * @return void
+     */
+    final protected static function setConfig($name,$value){}
+
+}

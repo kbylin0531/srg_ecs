@@ -1,0 +1,35 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: linzh
+ * Date: 2016/10/11
+ * Time: 23:36
+ */
+
+namespace Sharin\Library\Helper;
+
+
+class Encode {
+
+    /**
+     * 转换成php处理文件系统时所用的编码
+     * 即UTF-8转GB2312
+     * @param string $str 待转化的字符串
+     * @param string $strencode 该字符串的编码格式
+     * @return string|false 转化失败返回false
+     */
+    public static function toSystemEncode($str,$strencode='UTF-8'){
+        return $strencode === SR_OS_ENCODING? $str : iconv($strencode,SR_OS_ENCODING.'//IGNORE',$str);
+    }
+
+    /**
+     * 转换成程序使用的编码
+     * 即GB2312转UTF-8
+     * @param string $str 待转换的字符串
+     * @param string $program_encoding
+     * @return string|false 转化失败返回false
+     */
+    public static function toProgramEncode($str, $program_encoding='UTF-8'){
+        return $program_encoding === SR_OS_ENCODING? $str : iconv(SR_OS_ENCODING,"{$program_encoding}//IGNORE",$str);
+    }
+}

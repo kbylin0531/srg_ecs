@@ -1,0 +1,95 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-13
+ * Time: 下午4:50
+ */
+
+namespace Sharin\Core;
+use Sharin\Component;
+use Sharin\Developer;
+use Sharin\Exceptions\IO\FileExistException;
+
+/**
+ * Class Assets 资源处理类
+ * URL中访问了不存在的资源(模块、控制器、方法等因素不存在导致的)或者请求的是无相应控制器处理的动态资源时都会进入会进入该类下进行处理
+ *
+ * 访问了不存在的资源时，根据资源名称判定文件位置有时是不准确的,需要设定规则
+ *
+ * @package Sharin\Core
+ */
+class Assets extends Component {
+
+    protected static $name = 'assets';
+
+    public static function initializationize(array $config = null) {
+        parent::initializationize([
+            'rules' => [],
+        ]);
+        self::$rules = self::convention('rules',[]);
+    }
+
+    protected static $rules = [
+        'begin_with'    => [],//以...开始的字符串
+    ];
+
+    protected static function handleRule(string $assets) : bool
+    {
+        $assets_path = null;
+        //匹配开始字符串
+        if(!empty(self::$rules['begin_with'])){
+            foreach (self::$rules['begin_with'] as $beginer => $handel) {
+                if(0 === strpos($assets,$beginer)){
+                    if(is_string($handel)){
+                        //如果是字符串，仅仅是连接
+                        $assets_path = $handel . $assets;
+                    }elseif($handel instanceof \Closure){
+                        $assets_path = $handel($assets);
+                    }else{
+                        //continue
+                    }
+                    break;
+                }
+            }
+        }
+        //后续可能有其他规则 ...
+
+//        \Sharin\dumpout($assets_path,SR_PATH_PUBLIC.$assets,is_file($assets_path),Storage::has($assets_path,Storage::READ_ACCESS));
+
+        if($assets_path !== null and Storage::has($assets_path,Storage::READ_ACCESS)){
+            $public_path = SR_PATH_PUBLIC.$assets;
+
+//            \Sharin\dumpout($public_path,is_file($public_path));
+            if(!Storage::has($public_path)){
+                //文件已经存在，通常不可能发生
+                $content = Storage::read($assets_path);
+//                \Sharin\dumpout($content ,$assets_path,$public_path,Storage::write($public_path,$content ? $content : ''));
+                if(Storage::write($public_path,$content ? $content : '')){
+                    echo $content;
+                    return true;
+                };
+            }else{
+                //文件存在时不可能发生
+                throw new FileExistException($public_path);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 解析资源名称
+     * @return void 程序将在此结束
+     */
+    public static function parse() : void
+    {
+        //获取访问的资源名称
+        $asset = substr(trim($_SERVER['REQUEST_URI'],'/ '),strlen(trim(SR_SCRIPT_DIR,'/ ')));
+        if(!self::handleRule($asset)){
+            Response::sendHttpStatus(404,"Resource '$asset' Not Found");
+        }
+        Developer::closeTrace();
+        die();
+    }
+
+}

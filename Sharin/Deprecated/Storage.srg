@@ -1,0 +1,124 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-9
+ * Time: 下午2:42
+ */
+
+namespace Sharin\Deprecated;
+use Sharin\Library\Helper\Encode;
+use Sharin\Utils;
+
+/**
+ * Class Storage
+ * @method mixed read(string $filepath, string $file_encoding = null, bool $recursion = false) static 获取文件内容
+ * @method array readDir(string $dirpath,bool $recursion=false) static 获取文件夹下的内容
+ * @method int has(string $filepath) static 确定文件或者目录是否存在
+ * @method int|bool mtime(string $filepath, int $mtime = null) static 返回文件内容上次的修改时间
+ * @method int|false size(string $filepath) static 获取文件按大小
+ * @method bool mkdir(string $dirpath,int $auth = 0766) static 创建文件夹
+ * @method bool touch(string $filepath,int  $mtime = null,int  $atime = null) static 设定文件的访问和修改时间
+ * @method bool chmod(string $filepath,int  $auth = 0755) static 修改文件权限
+ * @method bool unlink(string $filepath,bool $recursion = false) static 删除文件,目录时必须保证该目录为空
+ * @method bool write(string $filepath,string $content,string $write_encode = null,string $text_encode = 'UTF-8') static 将指定内容写入到文件中
+ * @method bool append(string $filepath,string  $content,string $write_encode = null,string $text_encode = 'UTF-8') static 将指定内容追加到文件中
+
+ * @package Sharin\Deprecated
+ */
+class Storage
+{
+    /**
+     * @param $dirpath
+     * @param bool $recursion
+     * @param bool $_isouter 辅助参数,用于判断是外部调用还是内部的
+     * @return array
+     */
+    private static function _readir(string $dirpath,bool $recursion=false,bool $_isouter=true){
+        static $_file = [];
+        static $_dirpath_toread = null;
+        if(true === $_isouter){
+            $_file = [];
+            $_dirpath_toread = $dirpath;
+        }
+
+        $handler = opendir($dirpath);
+        while (($filename = readdir($handler))) {//未读到最后一个文件时候返回false,否则返回文件名称
+            if ($filename === '.' or $filename === '..' ) continue;
+            $fullpath = $dirpath.DIRECTORY_SEPARATOR.$filename;//子文件的完整路径
+            if(file_exists($fullpath)) {
+                $index = strpos($fullpath,$_dirpath_toread);
+                $_file[Encode::toProgramEncode(substr($fullpath,$index+strlen($_dirpath_toread)))] =
+                    str_replace('\\','/',Encode::toProgramEncode($fullpath));
+            }
+
+            if($recursion and is_dir($fullpath)) {
+                $_isouter = "{$_isouter}/{$filename}";
+                self::_readir($fullpath,$recursion,false);//递归,不清空
+            }
+        }
+        closedir($handler);//关闭目录指针
+        return $_file;
+    }
+
+    /**
+     * 获取文件权限，以linux的格式显示
+     * @static
+     * @param string $file
+     * @return string|false
+     */
+    public static function permission($file){
+        if(is_readable($file)){
+            $perms = fileperms($file);
+            if (($perms & 0xC000) == 0xC000) {
+                // Socket
+                $info = 's';
+            } elseif (($perms & 0xA000) == 0xA000) {
+                // Symbolic Link
+                $info = 'l';
+            } elseif (($perms & 0x8000) == 0x8000) {
+                // Regular
+                $info = '-';
+            } elseif (($perms & 0x6000) == 0x6000) {
+                // Block special
+                $info = 'b';
+            } elseif (($perms & 0x4000) == 0x4000) {
+                // Directory
+                $info = 'd';
+            } elseif (($perms & 0x2000) == 0x2000) {
+                // Character special
+                $info = 'c';
+            } elseif (($perms & 0x1000) == 0x1000) {
+                // FIFO pipe
+                $info = 'p';
+            } else {
+                // Unknown
+                $info = 'u';
+            }
+
+            // Owner
+            $info .= (($perms & 0x0100) ? 'r' : '-');
+            $info .= (($perms & 0x0080) ? 'w' : '-');
+            $info .= (($perms & 0x0040) ?
+                (($perms & 0x0800) ? 's' : 'x' ) :
+                (($perms & 0x0800) ? 'S' : '-'));
+
+            // Group
+            $info .= (($perms & 0x0020) ? 'r' : '-');
+            $info .= (($perms & 0x0010) ? 'w' : '-');
+            $info .= (($perms & 0x0008) ?
+                (($perms & 0x0400) ? 's' : 'x' ) :
+                (($perms & 0x0400) ? 'S' : '-'));
+
+            // Other
+            $info .= (($perms & 0x0004) ? 'r' : '-');
+            $info .= (($perms & 0x0002) ? 'w' : '-');
+            $info .= (($perms & 0x0001) ?
+                (($perms & 0x0200) ? 't' : 'x' ) :
+                (($perms & 0x0200) ? 'T' : '-'));
+            return $info;
+        }else{
+            return false;
+        }
+    }
+}

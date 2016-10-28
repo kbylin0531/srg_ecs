@@ -1,0 +1,55 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: linzh
+ * Date: 2016/10/11
+ * Time: 23:34
+ */
+
+namespace Sharin\Library\Helper;
+
+
+use Sharin\Developer;
+
+/**
+ * Class ClassTool 类工具
+ * @package Sharin\Library\Helper
+ */
+class ClassTool {
+
+    /**
+     * 调用类的静态方法
+     * 注意，调用callable的时候如果是静态方法，则不能带小括号，就像函数名称一样
+     *      例如：$callable = "{$clsnm}::{$method}";将永远返回false
+     * @param string $clsnm class name
+     * @param string $method method name
+     * @return mixed|null
+     */
+    public static function callStatic($clsnm,$method){
+        if(class_exists($clsnm,false)) {
+            $callable = "{$clsnm}::{$method}";
+            if(is_callable($callable)){
+                try{
+                    return $clsnm::$method();
+                }catch (\Exception $e){
+                    if(SR_DEBUG_MODE_ON) Developer::trace($e->getMessage());
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取类常量
+     * use defined() to avoid error of E_WARNING level
+     * @param string $class 完整的类名称
+     * @param string $constant 常量名称
+     * @param mixed $replacement 不存在时的代替
+     * @return mixed
+     */
+    public static function constant($class,$constant,$replacement=null){
+        if(!class_exists($class,true)) return $replacement;
+        $constant = "{$class}::{$constant}";
+        return defined($constant)?constant($constant):$replacement;
+    }
+}

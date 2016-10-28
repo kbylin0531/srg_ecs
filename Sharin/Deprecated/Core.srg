@@ -1,0 +1,152 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-9
+ * Time: 下午2:15
+ */
+
+namespace Sharin\Deprecated;
+use Sharin\Exceptions\MethodNotFoundException;
+use Sharin\Exception;
+
+/**
+ * Class Core
+ *
+ * @property array $config
+ *  'sample class' => [
+ *      'DRIVER_DEFAULT_INDEX' => 0,//默认驱动ID，类型限定为int或者string
+ *      'DRIVER_CLASS_LIST' => [],//驱动类的列表
+ *      'DRIVER_CONFIG_LIST' => [],//驱动类列表参数
+ *  ]
+ *
+ * @package Sharin
+ */
+abstract class Core {
+
+    use C,I;
+
+    /**
+     * 类实例的驱动
+     * @var object
+     */
+    private static $_drivers = [
+        /************************************
+        'sample class' => Object
+         ************************************/
+    ];
+    /**
+     * @var array 当前类使用的默认驱动的角标
+     */
+    protected static $_current_using = [];
+
+    /**
+     * @param int|string $index 指派当前默认的角标以覆盖静态配置文件中固定的设置
+     */
+    public static function using($index){
+        self::$_current_using[static::class] = $index;
+    }
+
+    /**
+     * 获取Driver-based Instance
+     * @param mixed $identify
+     * @return object
+     */
+    public static function instance( $identify=null){
+        if($identify === null and isset(self::$_current_using[static::class])){
+            $identify = self::$_current_using[static::class];
+        }
+        $instance = self::getInstance(null,null,$identify);
+        $instance->setDriver(self::driver($identify));
+        return $instance;
+    }
+
+    /**
+     * it maybe a waste of performance
+     * @param mixed $identify it will get the default index if set to null
+     * @return object
+     * @throws Exception
+     */
+    public static function driver( $identify=null){
+        $clsnm = static::class;
+        isset(self::$_drivers[$clsnm]) or self::$_drivers[$clsnm] = [];
+        $config = null;
+
+        //get default identify
+        if(null === $identify) {
+            $config = static::getConfig();
+            if(isset($config[DRIVER_DEFAULT_INDEX])){
+                $identify = $config[DRIVER_DEFAULT_INDEX];
+            }else{
+                return null;
+            }
+        }
+
+        //instance a driver for this identify
+        if(!isset(self::$_drivers[$clsnm][$identify])){
+            $config or $config = static::getConfig();
+            if(isset($config[DRIVER_CLASS_LIST][$identify])){
+                $driver_conf = isset($config[DRIVER_CONFIG_LIST][$identify])?$config[DRIVER_CONFIG_LIST][$identify]:null;
+                $driver_class = $config[DRIVER_CLASS_LIST][$identify];
+                self::$_drivers[$clsnm][$identify] = self::getInstance($driver_conf,$driver_class,$identify);
+            }else{
+                throw new Exception("无法创建类'{$clsnm}'关于'{$identify}'的驱动！");
+            }
+        }
+        return self::$_drivers[$clsnm][$identify];
+    }
+//------------------------------------------------- 实例驱动 ----------------------------------------------------------//
+    /**
+     * @var object 实例的驱动实例，一实例一驱动
+     */
+    protected $_driver = null;
+
+    /**
+     * @return object
+     */
+    public function getDriver(){
+        return $this->_driver;
+    }
+    /**
+     * @param object $driver
+     */
+    public function setDriver(object $driver){
+        $this->_driver = $driver;
+    }
+//------------------------------------------------- 魔术方法 ----------------------------------------------------------//
+    /**
+     * Use driver method as its instance method
+     * @param string $method method name
+     * @param array $arguments method arguments
+     * @return mixed
+     * @throws Exception
+     */
+    public function __call(string $method,array $arguments) {
+        $clsnm = static::class;
+        if(!isset($this->_driver)){
+            throw new Exception($clsnm);
+        }
+        if(!method_exists($this->_driver,$method)) throw new MethodNotFoundException($clsnm,$method);
+        return call_user_func_array([$this->_driver, $method], $arguments);
+    }
+
+    /**
+     * Use driver method as its static method
+     * @param string $method method name
+     * @param array $arguments method arguments
+     * @return mixed
+     * @throws Exception
+     */
+    public static function __callStatic(string $method,array $arguments) {
+        $driver = static::driver();
+        $clsnm = static::class;
+        if(null === $driver){
+            $callable = "{$clsnm}::_{$method}";
+        }else{
+            $callable = [$driver, $method];
+        }
+
+        if(!is_callable($callable)) throw new MethodNotFoundException($clsnm,$method);
+        return call_user_func_array($callable, $arguments);
+    }
+}

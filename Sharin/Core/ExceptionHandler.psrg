@@ -1,0 +1,78 @@
+<?php
+namespace Sharin\Core;
+use Sharin\Behaviour;
+use Sharin;
+use Sharin\Developer;
+
+/**
+ * Class ExceptionHandler
+ *  正常的请求一般不会发生异常，因此将处理异常的代码加入非必要的部分（web.module和bundle.inc之外）
+ * @package Sharin\Core
+ */
+class ExceptionHandler {
+
+    /**
+     * 处理错误信息
+     * @param $code
+     * @param $message
+     * @param $file
+     * @param $line
+     * @return true
+     */
+    public static function handleError($code, $message, $file, $line){
+        Behaviour::listen(ON_ERROR);
+
+        Response::cleanOutput();//清空之前的输出
+        if(SR_IS_AJAX) exit("File:{$file}   Line:{$line} Message:{$message}\n");
+        if(SR_DEBUG_MODE_ON)  Response::sendHttpStatus(403,'Resource Error!');
+
+        $trace = debug_backtrace();
+        $vars = [
+            'message'   => "C:{$code}   S:{$message}",
+            'position'  => "File:{$file}   Line:{$line}",
+            'trace'     => $trace, //be careful
+        ];
+
+        if(SR_DEBUG_MODE_ON){
+            Sharin::template('error',$vars);
+        }else{
+            Sharin::template('user_error');
+        }
+        Behaviour::listen(ON_ERROR_END);
+        return true;
+    }
+
+    public static function handleException(\Throwable $e){
+        Behaviour::listen(ON_EXCEPTION);
+
+        Response::cleanOutput();
+        if(SR_IS_AJAX) {
+            $message = $e->getMessage();
+            Logger::record($message);
+            exit($message);
+        }
+        SR_DEBUG_MODE_ON or Response::sendHttpStatus(403,'Resource Exception!');
+
+        $trace = $e->getTrace();
+        if(!empty($trace[0])){
+            empty($trace[0]['file']) and $trace[0]['file'] = 'Unkown file';
+            empty($trace[0]['line']) and $trace[0]['line'] = 'Unkown line';
+
+            $vars = [
+                'message'   => get_class($e).' : '.$e->getMessage(),
+                'position'  => 'File:'.$trace[0]['file'].'   Line:'.$trace[0]['line'],
+                'trace'     => $trace,
+            ];
+            if(SR_DEBUG_MODE_ON){
+                Developer::trace($vars);//页面跟踪错误
+                Sharin::template('exception',$vars);
+            }else{
+                Sharin::template('user_error');
+            }
+        }else{
+            Sharin::template('user_error');
+        }
+        Behaviour::listen(ON_EXCEPTION_END);
+    }
+
+}

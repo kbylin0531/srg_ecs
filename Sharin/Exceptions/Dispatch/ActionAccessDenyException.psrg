@@ -1,0 +1,24 @@
+<?php
+/**
+ * Github: https://github.com/linzongho/Sharin
+ * Email:linzongho@gmail.com
+ * User: asus
+ * Date: 8/24/16
+ * Time: 7:49 PM
+ */
+
+namespace Sharin\Exceptions\Dispatch;
+
+
+use Sharin\Exception as Exception;
+
+/**
+ * Class ActionAccessDenyException
+ * 仅允许访问静态的公开方法
+ * @package Sharin\Exceptions\Dispatch
+ */
+class ActionAccessDenyException extends Exception {
+
+
+
+}

@@ -1,0 +1,182 @@
+<?php
+/**
+ * Email: linzongho@gmail.com
+ * Github: https://github.com/linzongho/Sharin
+ * User: asus
+ * Date: 8/22/16
+ * Time: 11:40 AM
+ */
+
+namespace Sharin\Core;
+use Sharin\Component;
+use Sharin\Library\Helper\ClientAgent;
+use Sharin\Exception;
+/**
+ * Class Log 日志管理类
+ * @package Kbylin\System\Core
+ */
+class Logger extends Component {
+
+    protected static $name = 'log';
+    /**
+     * 日志频率
+     * LOGRATE_DAY  每天一个文件的日志频率
+     * LOGRATE_HOUR 每小时一个文件的日志频率，适用于较频繁的访问
+     */
+    const LOGRATE_HOUR = 0;
+    const LOGRATE_DAY = 1;
+
+    /**
+     * 系统预设的级别，用户也可以自定义
+     */
+    const LEVEL_DEBUG   = 'Debug';//错误和调试
+    const LEVEL_NOTICE  = 'Notice';
+    const LEVEL_INFO    = 'Info';
+    const LEVEL_WARN    = 'Warn';
+    const LEVEL_ERROR   = 'Error';
+    const LEVEL_RECORD  = 'Record';//记录日常操作的数据信息，以便数据丢失后寻回
+
+    private static $config = [];
+
+    public static function initializationize(array $config = null){
+        parent::initializationize([
+            'RATE'      => Logger::LOGRATE_DAY,
+            //Think\Log
+            'TIME_FORMAT'   =>  ' c ',
+            'FILE_SIZE'     =>  2097152,
+            'PATH'  => SR_PATH_RUNTIME.'/Log',
+            // 允许记录的日志级别
+            'LEVEL'         =>  true,//'EMERG,ALERT,CRIT,ERR,WARN,NOTIC,INFO,DEBUG,SQL',
+        ]);
+        self::$config = self::convention();
+        //一旦该类加载进来，那么这段语句必定执行，无需手动调用
+        register_shutdown_function(function(){
+            Logger::save();
+        });
+    }
+
+    /**
+     * @var array 日志信息
+     */
+    private static $records       =  [];
+
+//--------------------------------------- 内置的静态方法:record + save  -------------------------------------------------------------------//
+    /**
+     * 记录日志 并且会过滤未经设置的级别
+     * @static
+     * @access public
+     * @param string $message 日志信息
+     * @param string $level  日志级别
+     * @param boolean $force  是否强制记录
+     * @return void
+     */
+    public static function record(string $message,string $level=self::LEVEL_INFO,bool $force=false) : void {
+        static $allowlevel = null;
+        null === $allowlevel and $allowlevel = self::convention('LEVEL',true);
+        if($force or $allowlevel or false !== strpos($allowlevel,$level)){
+            self::$records[] =   "{$level}: {$message}\n";
+        }
+    }
+
+    /**
+     * 保存record记录的信息，该函数无需手动调用
+     * @static
+     * @access public
+     * @param string $destination  写入目标
+     * @return void
+     * @throws Exception
+     */
+    public static function save($destination='') {
+        if(self::$records){
+            $message    =   implode('',self::$records);
+
+            $config = self::convention();
+            $now = date($config['TIME_FORMAT']);
+
+            $level = self::LEVEL_RECORD;
+            if(!$destination){
+                if(isset($datetime)){
+                    $destination = SR_PATH_RUNTIME."/Log/{$level}/{$datetime}.log";
+                }else{
+                    $date = date('Y-m-d');
+                    $rate = self::convention('RATE',Logger::LOGRATE_DAY);
+                    $rate or $rate = self::LOGRATE_DAY;
+                    switch($rate){
+                        case self::LOGRATE_DAY:
+                            $destination = SR_PATH_RUNTIME."/Log/{$level}/{$date}.log";
+                            break;
+                        case self::LOGRATE_HOUR:
+                            $hour = date('H');
+                            $destination = SR_PATH_RUNTIME."/Log/{$level}/{$date}/{$hour}.log";
+                            break;
+                        default:
+                            throw new Exception("日志频率未定义：'{$rate}'");
+                    }
+                }
+            }
+
+            // 自动创建日志目录
+            $log_dir = dirname($destination);
+            if (!is_dir($log_dir)) {
+                mkdir($log_dir, 0755, true);
+            }
+            error_log("[{$now}] ".$_SERVER['REMOTE_ADDR'].' '.$_SERVER['REQUEST_URI']."\n{$message}\n", 3,$destination);
+            // 保存后清空日志缓存
+            self::$records = [];
+        }
+    }
+
+
+
+    /**
+     * 写入日志信息
+     * 如果日志文件已经存在，则追加到文件末尾
+     * @param string|array $content 日志内容
+     * @param string $file 日志文件位置或者标识符（一个日志文件或者日志组是唯一的）
+     * @return bool 写入是否成功
+     * @throws Exception
+     */
+    public function write($content,$file){
+        is_string($content) or $content = var_export($content,true);
+        $date = date('Y-m-d');
+        if(is_array($content)){//数组写入
+            $ready2write = var_export($content,true);
+        }else{
+            $ready2write = $content;
+        }
+        $remoteIp = ClientAgent::getClientIP();
+        $ready2write = "-------------------------------------------------------------------------------------\n {$date[0]}  IP:{$remoteIp}  URL:{$_SERVER['REQUEST_URI']}\n-------------------------------------------------------------------------------------\n{$ready2write}\n\n\n\n";
+
+        $dir = dirname($file);
+        is_dir($dir) or Storage::mkdir($dir);
+
+        if(is_file($file)){
+            $handler = fopen($file,'a+');//追加方式，如果文件不存在则无法创建
+            if(false === fwrite($handler,$ready2write)){
+                return Exception::throwing('Failed to write log in append mode!');
+            }
+            if(false === fclose($handler)) {
+                return Exception::throwing('Failed to close log file!');
+            }
+            return true;
+        }else{
+            //写入0个字节或者返回false都被认为失败
+            return true == file_put_contents($file,$ready2write);
+        }
+    }
+
+
+    /**
+     * 读取日志文件内容
+     * 如果设置了参数二，则参数一将被认定为文件名
+     * @param string $faile 日志文件位置或者标识符（一个日志文件或者日志组是唯一的）
+     * @return string 返回日志内容
+     */
+    public function read($faile){
+        if(is_file($faile)){
+            return file_get_contents($faile);
+        }else{
+            return '';
+        }
+    }
+}

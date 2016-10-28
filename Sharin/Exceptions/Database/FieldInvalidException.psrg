@@ -1,0 +1,17 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: asus
+ * Date: 16-10-18
+ * Time: 下午4:36
+ */
+
+namespace Sharin\Exceptions\Database;
+
+
+use Sharin\Exception;
+
+class FieldInvalidException extends Exception
+{
+
+}
